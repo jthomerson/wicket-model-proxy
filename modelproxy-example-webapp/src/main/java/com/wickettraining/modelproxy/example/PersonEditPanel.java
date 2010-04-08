@@ -18,11 +18,15 @@ package com.wickettraining.modelproxy.example;
 
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 
 import com.wickettraining.modelproxy.domain.Person;
+import com.wickettraining.modelproxy.domain.PhoneNumber;
 
 public class PersonEditPanel extends Panel {
 
@@ -39,7 +43,19 @@ public class PersonEditPanel extends Panel {
 		};
 		form.add(new TextField<String>("firstName"));
 		form.add(new TextField<String>("lastName"));
+		form.add(createPhoneNumberListView("phoneNumbers"));
 		add(form);
+	}
+
+	protected ListView<PhoneNumber> createPhoneNumberListView(String id) {
+		return new PropertyListView<PhoneNumber>(id) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void populateItem(ListItem<PhoneNumber> item) {
+				item.add(new TextField<String>("number"));
+			}
+		};
 	}
 
 	protected void formSubmitted() {
