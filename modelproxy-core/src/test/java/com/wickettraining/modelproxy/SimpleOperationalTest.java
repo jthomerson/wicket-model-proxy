@@ -1,18 +1,12 @@
 package com.wickettraining.modelproxy;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-
-import junit.framework.TestCase;
-
 import com.wickettraining.modelproxy.domain.FakeDatabase;
 import com.wickettraining.modelproxy.domain.Person;
 import com.wickettraining.modelproxy.domain.PhoneNumber;
 
-public class SimpleOperationalTest extends TestCase {
+public class SimpleOperationalTest extends BaseProxyManagerTest {
 
-	public void testname() throws Exception {
+	public void testSimpleOperations() throws Exception {
 		FakeDatabase db = FakeDatabase.get();
 
 		ProxyManager pm = new ProxyManager();
@@ -40,20 +34,7 @@ public class SimpleOperationalTest extends TestCase {
 		pm.proxy(person2, "person");
 		pm.commit();
 
-		assertTrue("Person proxy equals committed person", person.equals(person2));
-		assertTrue("Original person object equals proxy committed person", orig.equals(person2));
-		assertTrue("Original person object equals original second person", orig.equals(orig2));
-		System.out.println("ProxyManager size: " + getObjectSize(pm));
-		System.out.println("Person size: " + getObjectSize(orig));
-	}
-
-	private static long getObjectSize(Object obj) throws Exception {
-		File file = File.createTempFile("testserialization", "bin");
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-		oos.writeObject(obj);
-		oos.flush();
-		oos.close();
-		return file.length();
+		compareTwoPeople(pm, person, person2, orig, orig2);
 	}
 
 }

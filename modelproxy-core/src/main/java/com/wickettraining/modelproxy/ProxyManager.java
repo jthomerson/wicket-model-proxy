@@ -123,7 +123,7 @@ public class ProxyManager implements Serializable {
 				boolean doRecord = false;
 				Object result = invocation.proceed();
 				Object proxyResult = null;
-				if (result != null && result.getClass().isPrimitive() == false) {
+				if (result != null && isModifiable(result)) {
 					String ourID = createUniqueID(result);
 					try {
 						System.out.println("Because of invocation [" + toString(invocation) + "] , we are creating subproxy with ID [" + ourID + "]: " + result);
@@ -153,11 +153,22 @@ public class ProxyManager implements Serializable {
 		return inter;
 	}
 
+	protected boolean isModifiable(Object obj) {
+		if (obj.getClass().isPrimitive() || obj instanceof String || obj instanceof Number || obj instanceof Void || obj instanceof Boolean) {
+			return false;
+		}
+		return true;
+	}
+
 	protected String createUniqueID(Object object, Method method) {
 		return createUniqueID(object) + "--" + method.toGenericString();
 	}
 	protected String createUniqueID(Object object) {
 		return object.getClass().getSimpleName() + "--" + object.hashCode();
+	}
+
+	public int getRecordingCount() {
+		return recordings.size();
 	}
 
 }
