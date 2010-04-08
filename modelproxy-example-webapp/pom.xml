@@ -5,38 +5,35 @@
 	<parent>
 		<groupId>com.wickettraining</groupId>
 		<artifactId>modelproxy-parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>0.7-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.wickettraining</groupId>
 	<artifactId>modelproxy-example-webapp</artifactId>
 	<packaging>war</packaging>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.7-SNAPSHOT</version>
 	<name>Model Proxy - Example Webapp</name>
 	<description></description>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+
 	<dependencies>
+		<!-- INTER-PROJECT DEPENDENCIES -->
+		<dependency>
+			<groupId>com.wickettraining</groupId>
+			<artifactId>modelproxy-test-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.wickettraining</groupId>
+			<artifactId>modelproxy-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!--  WICKET DEPENDENCIES -->
 		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket</artifactId>
 		</dependency>
-                <dependency>
-                        <groupId>com.wickettraining</groupId>
-                        <artifactId>modelproxy-test-domain</artifactId>
-                        <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                        <groupId>com.wickettraining</groupId>
-                        <artifactId>modelproxy-core</artifactId>
-                        <version>${project.version}</version>
-                </dependency>
+
 		<!-- LOGGING DEPENDENCIES - LOG4J -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -46,11 +43,14 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
+
+		<!-- TESTING DEPENDENCIES -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
 		</dependency>
+		
+		<!-- JETTY DEPENDENCIES FOR TESTING -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
@@ -65,61 +65,11 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<resources>
-			<resource>
-				<filtering>false</filtering>
-				<directory>src/main/resources</directory>
-			</resource>
-			<resource>
-				<filtering>false</filtering>
-				<directory>src/main/java</directory>
-				<includes>
-					<include>**</include>
-				</includes>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<filtering>false</filtering>
-				<directory>src/test/java</directory>
-				<includes>
-					<include>**</include>
-				</includes>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</testResource>
-		</testResources>
 		<plugins>
-			<plugin>
-				<inherited>true</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-					<optimize>true</optimize>
-					<debug>true</debug>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
-	<properties>
-		<wicket.version>1.4.7</wicket.version>
-		<jetty.version>6.1.4</jetty.version>
-	</properties>
 </project>

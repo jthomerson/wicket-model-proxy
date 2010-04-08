@@ -4,12 +4,24 @@
 	<groupId>com.wickettraining</groupId>
 	<artifactId>modelproxy-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.7-SNAPSHOT</version>
 	<name>Model Proxy for Wicket</name>
 	<description>
 		The model proxy project allows you to wrap your models with a proxy
 		that records changes made to objects across requests.
 	</description>
+
+	<properties>
+		<wicket.version>1.4.7</wicket.version>
+		<jetty.version>6.1.4</jetty.version>
+	</properties>
+
+	<inceptionYear>2010</inceptionYear>
+	<organization>
+		<name><![CDATA[WicketTraining.com (Jeremy Thomerson at Expert Tech Services, LLC)]]></name>
+		<url>http://wickettraining.com</url>
+	</organization>
+	
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -17,70 +29,74 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
 	<modules>
 		<module>modelproxy-example-webapp</module>
 		<module>modelproxy-core</module>
 		<module>modelproxy-test-domain</module>
 	</modules>
 	<dependencyManagement>
-	<dependencies>
-		<!--  WICKET DEPENDENCIES -->
-		<dependency>
-			<groupId>org.apache.wicket</groupId>
-			<artifactId>wicket</artifactId>
-			<version>${wicket.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-proxy</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib-nodep</artifactId>
-			<version>2.2</version>
-		</dependency>
-		<!-- LOGGING DEPENDENCIES - LOG4J -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.4.2</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-		</dependency>
+		<dependencies>
+			<!--  WICKET DEPENDENCIES -->
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket</artifactId>
+				<version>${wicket.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<!-- PROXYING DEPENDENCIES -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-proxy</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>cglib</groupId>
+				<artifactId>cglib-nodep</artifactId>
+				<version>2.2</version>
+			</dependency>
+			
+			<!-- LOGGING DEPENDENCIES - LOG4J -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.4.2</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.14</version>
+			</dependency>
 
-		<!--  JUNIT DEPENDENCY FOR TESTING -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
-			<scope>test</scope>
-		</dependency>
+			<!--  JUNIT DEPENDENCY FOR TESTING -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>3.8.2</version>
+				<scope>test</scope>
+			</dependency>
 
-		<!--  JETTY DEPENDENCIES FOR TESTING  -->
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>${jetty.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-			<version>${jetty.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-management</artifactId>
-			<version>${jetty.version}</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+			<!--  JETTY DEPENDENCIES FOR TESTING  -->
+			<dependency>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-management</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
 	</dependencyManagement>
 	<build>
 		<plugins>
@@ -96,20 +112,38 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
 				</configuration>
+			</plugin>
+			<plugin>
+				<inherited>false</inherited>
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<configuration>
+					<header>${basedir}/etc/license-header.txt</header>
+					<failIfMissing>true</failIfMissing>
+					<aggregate>true</aggregate>
+					<excludes>
+						<exclude>LICENSE.txt</exclude>
+					</excludes>
+					<useDefaultExcludes>true</useDefaultExcludes>
+					<properties>
+						<year>${project.inceptionYear}</year>
+						<owner>${project.organization.name}</owner>
+					</properties>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
-	<properties>
-		<wicket.version>1.4.7</wicket.version>
-		<jetty.version>6.1.4</jetty.version>
-	</properties>
 </project>
