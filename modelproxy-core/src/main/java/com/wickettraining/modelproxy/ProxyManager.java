@@ -1,7 +1,10 @@
 package com.wickettraining.modelproxy;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +13,13 @@ import org.apache.commons.proxy.Interceptor;
 import org.apache.commons.proxy.Invocation;
 import org.apache.commons.proxy.ProxyFactory;
 import org.apache.commons.proxy.factory.cglib.CglibProxyFactory;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 public class ProxyManager implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private List<Recording> recordings = new ArrayList<Recording>();
 	private boolean committing = false;
 	private transient ProxyFactory factory;
@@ -23,6 +28,40 @@ public class ProxyManager implements Serializable {
 	public ProxyManager() {
 	}
 	
+	public <T> IModel<T> proxyModel(final IModel<T> model) {
+		return new LoadableDetachableModel<T>() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected T load() {
+				T ret = proxy(model.getObject());
+				try {
+					commit();
+				} catch(Exception ex) {
+					System.err.println("Error while committing during proxyModel#load: " + ex.getMessage());
+					ex.printStackTrace();
+				}
+				return ret;
+			}
+			
+			@Override
+			public void setObject(T object) {
+				super.setObject(object);
+				model.setObject(object);
+			}
+			
+			@Override
+			public void detach() {
+				super.detach();
+				model.detach();
+			}
+		};
+	}
+
+	public final <T> T proxy(T object) {
+		return proxy(object, createUniqueID(object));
+	}
+
 	@SuppressWarnings("unchecked")
 	public final <T> T proxy(T object, String uniqueID) {
 		if (object == null) {
@@ -30,7 +69,7 @@ public class ProxyManager implements Serializable {
 			return null;
 		}
 		T proxy = (T) getFactory().createInterceptorProxy(object, createInterceptor(uniqueID), new Class[] { object.getClass() });
-		Object replaced = targets.put(uniqueID, proxy);
+		Object replaced = targets.put(uniqueID, object);
 		if (replaced != null) {
 			System.err.println("WARNING: you replaced one object with another in the proxy manager.  this was most likely a mistake.  you should make sure that you are truly generating a unique ID for each object");
 		}
@@ -45,7 +84,21 @@ public class ProxyManager implements Serializable {
 		return new CglibProxyFactory();
 	}
 
-	public void commit() throws CommitException {
+	public synchronized void commitTo(Object object) throws CommitException {
+		if (object instanceof Collection<?>) {
+			for(Object obj : ((Collection<?>) object)) {
+				replaceTarget(obj);
+			}
+		}
+		replaceTarget(object);
+		commit();
+	}
+
+	private void replaceTarget(Object obj) {
+		targets.put(createUniqueID(obj), obj);
+	}
+
+	public synchronized void commit() throws CommitException {
 		committing = true;
 		System.out.println("\nStarting commit");
 		for(Recording rec : new ArrayList<Recording>(recordings)) {
@@ -68,12 +121,12 @@ public class ProxyManager implements Serializable {
 				int hashBefore = invocation.getProxy().hashCode();
 				Recording rec = new Recording(uniqueID, invocation.getMethod(), invocation.getArguments());
 				boolean doRecord = false;
-				String ourID = invocation.getMethod().toGenericString() + invocation.getProxy().hashCode();
 				Object result = invocation.proceed();
 				Object proxyResult = null;
 				if (result != null && result.getClass().isPrimitive() == false) {
+					String ourID = createUniqueID(result);
 					try {
-						System.out.println("Creating subproxy with ID [" + ourID + "]: " + result);
+						System.out.println("Because of invocation [" + toString(invocation) + "] , we are creating subproxy with ID [" + ourID + "]: " + result);
 						doRecord = true;
 						proxyResult = proxy(result, ourID);
 					} catch(Exception ex) {
@@ -82,23 +135,29 @@ public class ProxyManager implements Serializable {
 				}
 				int hashAfter = invocation.getProxy().hashCode();
 				doRecord = doRecord ? true : hashAfter != hashBefore;
-				if (doRecord && !committing) {
-					recordings.add(rec);
-					System.out.println("Recorded: " + rec);
-				} else {
-					System.out.println("No change, did not record: " + rec);
+				synchronized (ProxyManager.this) {
+					if (doRecord && !committing) {
+						recordings.add(rec);
+						System.out.println("Recorded: " + rec);
+					} else {
+//						System.out.println("No change, did not record: " + rec);
+					}
 				}
 				return proxyResult == null ? result : proxyResult;
+			}
+
+			private String toString(Invocation invocation) {
+				return invocation.getMethod() + "(" + Arrays.toString(invocation.getArguments()) + ") on " + invocation.getProxy();
 			}
 		};
 		return inter;
 	}
 
-	public List<Recording> getRecordings() {
-		return recordings;
+	protected String createUniqueID(Object object, Method method) {
+		return createUniqueID(object) + "--" + method.toGenericString();
 	}
-	public void setRecordings(List<Recording> recordings) {
-		this.recordings = recordings;
+	protected String createUniqueID(Object object) {
+		return object.getClass().getSimpleName() + "--" + object.hashCode();
 	}
-	
+
 }

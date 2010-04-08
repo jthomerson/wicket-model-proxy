@@ -3,7 +3,6 @@ package com.wickettraining.modelproxy.example;
 import java.util.List;
 
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -44,6 +43,7 @@ public class HomePage extends BasePage {
     			System.out.println("Button('save').onSubmit()");
     			FakeDatabase db = FakeDatabase.get();
     			db.saveAll(ldm.getObject());
+    			setResponsePage(getPageClass());
     		}
     	});
     	add(form);

@@ -32,6 +32,11 @@
                         <artifactId>modelproxy-test-domain</artifactId>
                         <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                        <groupId>com.wickettraining</groupId>
+                        <artifactId>modelproxy-core</artifactId>
+                        <version>${project.version}</version>
+                </dependency>
 		<!-- LOGGING DEPENDENCIES - LOG4J -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

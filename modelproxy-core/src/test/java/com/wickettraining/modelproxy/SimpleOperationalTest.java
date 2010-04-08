@@ -35,12 +35,10 @@ public class SimpleOperationalTest extends TestCase {
 
 		System.out.println("Person hash code: " + person.hashCode());
 
-		ProxyManager pm2 = new ProxyManager();
-		pm2.setRecordings(pm.getRecordings());
 		Person person2 = db.get(Person.class, 1);
 		Person orig2 = person2;
-		pm2.proxy(person2, "person");
-		pm2.commit();
+		pm.proxy(person2, "person");
+		pm.commit();
 
 		assertTrue("Person proxy equals committed person", person.equals(person2));
 		assertTrue("Original person object equals proxy committed person", orig.equals(person2));

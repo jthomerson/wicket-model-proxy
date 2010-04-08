@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 
+import com.wickettraining.modelproxy.CommitException;
+import com.wickettraining.modelproxy.ProxyManager;
 import com.wickettraining.modelproxy.domain.FakeDatabase;
 import com.wickettraining.modelproxy.domain.Person;
 
@@ -19,7 +21,9 @@ public class ProxyingModelHomePage extends HomePage {
     }
 
 	protected void createComponents() {
-		final IModel<? extends List<? extends Person>> ldm = new LoadAllPeopleModel();
+		final ProxyManager pm = new OurProxyManager();
+		final IModel<List<? extends Person>> ldm = new LoadAllPeopleModel();
+		
     	Form<Void> form = new Form<Void>("form");
     	form.add(new Button("cancel") {
 			private static final long serialVersionUID = 1L;
@@ -37,7 +41,15 @@ public class ProxyingModelHomePage extends HomePage {
     		public void onSubmit() {
     			System.out.println("Button('save').onSubmit()");
     			FakeDatabase db = FakeDatabase.get();
-    			db.saveAll(ldm.getObject());
+    			List<? extends Person> all = ldm.getObject();
+    			try {
+					pm.commitTo(all);
+				} catch (CommitException e) {
+					System.err.println("Error committing changes to the list before saving");
+					e.printStackTrace();
+				}
+    			db.saveAll(all);
+    			setResponsePage(getPageClass());
     		}
     	});
     	add(form);
@@ -46,6 +58,7 @@ public class ProxyingModelHomePage extends HomePage {
 
 			@Override
 			protected void populateItem(final ListItem<Person> item) {
+				item.setModel(pm.proxyModel(item.getModel()));
 				final PersonViewPanel personViewPanel = new PersonViewPanel("content", item.getModel()) {
 					private static final long serialVersionUID = 1L;
 
@@ -55,6 +68,11 @@ public class ProxyingModelHomePage extends HomePage {
 							private static final long serialVersionUID = 1L;
 
 							protected void formSubmitted() {
+								try {
+									pm.commit();
+								} catch (CommitException e) {
+									throw new RuntimeException(e);
+								}
 								replaceWith(pvp);
 							}
 						});
