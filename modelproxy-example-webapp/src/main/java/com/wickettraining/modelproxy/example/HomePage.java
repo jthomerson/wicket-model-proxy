@@ -28,18 +28,11 @@ import org.apache.wicket.model.IModel;
 import com.wickettraining.modelproxy.domain.FakeDatabase;
 import com.wickettraining.modelproxy.domain.Person;
 
-/**
- * Homepage
- */
 public class HomePage extends BasePage {
 
 	private static final long serialVersionUID = 1L;
 
     public HomePage(final PageParameters parameters) {
-    	createComponents();
-    }
-
-	protected void createComponents() {
 		final IModel<? extends List<? extends Person>> ldm = new LoadAllPeopleModel();
     	Form<Void> form = new Form<Void>("form");
     	form.add(new Button("cancel") {
@@ -57,8 +50,7 @@ public class HomePage extends BasePage {
 			@Override
     		public void onSubmit() {
     			System.out.println("Button('save').onSubmit()");
-    			FakeDatabase db = FakeDatabase.get();
-    			db.saveAll(ldm.getObject());
+    			doSaveAll(ldm);
     			setResponsePage(getPageClass());
     		}
     	});
@@ -68,6 +60,7 @@ public class HomePage extends BasePage {
 
 			@Override
 			protected void populateItem(final ListItem<Person> item) {
+				item.setModel(wrapListItemModel(item.getModel()));
 				final PersonViewPanel personViewPanel = new PersonViewPanel("content", item.getModel()) {
 					private static final long serialVersionUID = 1L;
 
@@ -85,6 +78,15 @@ public class HomePage extends BasePage {
 				item.add(personViewPanel);
 			}
 		}.setReuseItems(true));
+	}
+
+	protected IModel<Person> wrapListItemModel(IModel<Person> model) {
+		return model;
+	}
+
+	protected void doSaveAll(IModel<? extends List<? extends Person>> ldm) {
+		FakeDatabase db = FakeDatabase.get();
+		db.saveAll(ldm.getObject());
 	}
 
 }
