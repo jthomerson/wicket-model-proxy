@@ -16,6 +16,14 @@ public class WicketApplication extends WebApplication
 	{
 	}
 	
+	@Override
+	protected void init() {
+		super.init();
+		
+		mountBookmarkablePage("ldm", HomePage.class);
+		mountBookmarkablePage("proxying", ProxyingModelHomePage.class);
+	}
+	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */

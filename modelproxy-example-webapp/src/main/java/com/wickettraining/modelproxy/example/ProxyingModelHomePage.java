@@ -3,7 +3,6 @@ package com.wickettraining.modelproxy.example;
 import java.util.List;
 
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -13,15 +12,10 @@ import org.apache.wicket.model.IModel;
 import com.wickettraining.modelproxy.domain.FakeDatabase;
 import com.wickettraining.modelproxy.domain.Person;
 
-/**
- * Homepage
- */
-public class HomePage extends BasePage {
+public class ProxyingModelHomePage extends HomePage {
 
-	private static final long serialVersionUID = 1L;
-
-    public HomePage(final PageParameters parameters) {
-    	createComponents();
+	public ProxyingModelHomePage(PageParameters parameters) {
+		super(parameters);
     }
 
 	protected void createComponents() {

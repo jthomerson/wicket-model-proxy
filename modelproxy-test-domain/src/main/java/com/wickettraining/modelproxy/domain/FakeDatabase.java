@@ -1,6 +1,8 @@
 package com.wickettraining.modelproxy.domain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FakeDatabase {
@@ -17,6 +19,14 @@ public class FakeDatabase {
 		createData();
 	}
 	
+	public <T extends Entity> List<T> getAll(Class<T> clazz) {
+		List<T> list = new ArrayList<T>();
+		for(Integer id : data.get(clazz).keySet()) {
+			list.add(get(clazz, id));
+		}
+		return list;
+	}
+
 	@SuppressWarnings("unchecked")
 	public final <T extends Entity> T get(Class<T> clazz, int id) {
 		try {
@@ -26,6 +36,12 @@ public class FakeDatabase {
 		}
 	}
 	
+	public void saveAll(List<? extends Entity> objects) {
+		for(Entity ent : objects) {
+			save(ent);
+		}
+	}
+
 	public final void save(Entity entity) {
 		putEntity(entity);
 	}
@@ -77,4 +93,5 @@ public class FakeDatabase {
 		}
 		return person;
 	}
+
 }

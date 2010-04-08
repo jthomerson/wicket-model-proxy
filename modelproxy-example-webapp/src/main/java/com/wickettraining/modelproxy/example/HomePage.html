@@ -1,10 +1,15 @@
 <html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd" >
-    <head>  
-        <title>Wicket Quickstart Archetype Homepage</title>
-    </head>
     <body>
-        <strong>Wicket Quickstart Archetype Homepage</strong>
-        <br/><br/>
-        <span wicket:id="message">message will be here</span>
+    	<wicket:extend>
+	    	<form wicket:id="form">
+	    	<ul>
+	    		<li wicket:id="people">
+	    			<div wicket:id="content"></div>
+	    		</li>
+	    	</ul>
+	    	<input type="submit" wicket:id="save" value="Save All Changes" />
+	    	<input type="submit" wicket:id="cancel" value="Cancel All Changes" />
+	    	</form>
+    	</wicket:extend>
     </body>
 </html>
