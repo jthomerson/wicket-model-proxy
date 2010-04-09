@@ -17,6 +17,7 @@
 package com.wickettraining.modelproxy;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,20 +76,29 @@ public class ProxyManager implements Serializable {
 	}
 
 	public final <T> T proxy(T object) {
-		return proxy(object, createUniqueID(object));
-	}
-
-	@SuppressWarnings("unchecked")
-	public final <T> T proxy(T object, String uniqueID) {
-		if (object == null) {
-			System.err.println("WARNING: can not proxy null object");
-			return null;
-		}
-		T proxy = (T) getFactory().createInterceptorProxy(object, createInterceptor(uniqueID), new Class[] { object.getClass() });
+		final String uniqueID = createUniqueID(object);
 		Object replaced = targets.put(uniqueID, object);
 		if (replaced != null) {
 			System.err.println("WARNING: you replaced one object with another in the proxy manager.  this was most likely a mistake.  you should make sure that you are truly generating a unique ID for each object");
 		}
+		ObjectLocator locator = new ObjectLocator() {
+			private static final long serialVersionUID = 1L;
+
+			public Object getObject() {
+				return targets.get(uniqueID);
+			}
+		};
+
+		return proxy(object, locator);
+	}
+
+	@SuppressWarnings("unchecked")
+	public final <T> T proxy(T object, final ObjectLocator locator) {
+		if (object == null) {
+			System.err.println("WARNING: can not proxy null object");
+			return null;
+		}
+		T proxy = (T) getFactory().createInterceptorProxy(object, createInterceptor(locator), new Class[] { object.getClass() });
 		return proxy;
 	}
 
@@ -101,6 +111,9 @@ public class ProxyManager implements Serializable {
 	}
 
 	public synchronized void commitTo(Object object) throws CommitException {
+		commitTo(object, createUniqueID(object));
+	}
+	public synchronized void commitTo(Object object, String string) throws CommitException {
 		if (object instanceof Collection<?>) {
 			for(Object obj : ((Collection<?>) object)) {
 				replaceTarget(obj);
@@ -118,33 +131,40 @@ public class ProxyManager implements Serializable {
 		committing = true;
 		System.out.println("\nStarting commit");
 		for(Recording rec : new ArrayList<Recording>(recordings)) {
-			System.out.println("Committing [" + rec.getUniqueTargetObjectID() + "]: " + rec);
-			Object target = targets.get(rec.getUniqueTargetObjectID());
-			if (target == null) {
-				System.err.println("Problem: could not find target for ID: " + rec.getUniqueTargetObjectID());
-				System.err.println("All targets: " + targets);
-			}
-			rec.applyTo(target);
+			System.out.println("Committing: " + rec);
+			Object target = rec.getObjectLocator().getObject();
+			Object result = rec.applyTo(target);
+			System.out.println("return from apply: " + result);
 		}
 		System.out.println("Commit complete\n");
 		committing = false;
 	}
 
-	private Interceptor createInterceptor(final String uniqueID) {
+	private Interceptor createInterceptor(final ObjectLocator locator) {
 		Interceptor inter = new Interceptor() {
 			
-			public Object intercept(Invocation invocation) throws Throwable {
+			public Object intercept(final Invocation invocation) throws Throwable {
 				int hashBefore = invocation.getProxy().hashCode();
-				Recording rec = new Recording(uniqueID, invocation.getMethod(), invocation.getArguments());
+				Recording rec = new Recording(locator, invocation.getMethod(), invocation.getArguments());
 				boolean doRecord = false;
 				Object result = invocation.proceed();
 				Object proxyResult = null;
 				if (result != null && isModifiable(result)) {
-					String ourID = createUniqueID(result);
 					try {
-						System.out.println("Because of invocation [" + toString(invocation) + "] , we are creating subproxy with ID [" + ourID + "]: " + result);
+						System.out.println("Because of invocation [" + toString(invocation) + "] , we are creating a subproxy: " + result);
 						doRecord = true;
-						proxyResult = proxy(result, ourID);
+						ObjectLocator ourLocator = new ObjectLocator() {
+							private static final long serialVersionUID = 1L;
+
+							public Object getObject() {
+								try {
+									return invocation.getMethod().invoke(locator.getObject(), invocation.getArguments());
+								} catch (Exception e) {
+									throw new RuntimeException("error while trying to locate a child object of the originally proxied object: " + e.getMessage(), e);
+								}
+							}
+						};
+						proxyResult = proxy(result, ourLocator);
 					} catch(Exception ex) {
 						System.err.println("Can not create proxy for: " + result + "[" + ex.getMessage() + "]");
 					}
@@ -152,7 +172,7 @@ public class ProxyManager implements Serializable {
 				int hashAfter = invocation.getProxy().hashCode();
 				doRecord = doRecord ? true : hashAfter != hashBefore;
 				synchronized (ProxyManager.this) {
-					if (doRecord && !committing) {
+					if (doRecord) {
 						recordings.add(rec);
 						System.out.println("Recorded: " + rec);
 					} else {

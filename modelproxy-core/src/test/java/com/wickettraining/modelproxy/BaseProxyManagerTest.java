@@ -22,6 +22,7 @@ import java.io.ObjectOutputStream;
 
 import junit.framework.TestCase;
 
+import com.wickettraining.modelproxy.domain.Entity;
 import com.wickettraining.modelproxy.domain.Person;
 
 public class BaseProxyManagerTest extends TestCase {
@@ -31,6 +32,21 @@ public class BaseProxyManagerTest extends TestCase {
 		// this is simply a base class, not a real test case class
 	}
 	
+	private static class MyProxyManager extends ProxyManager {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected String createUniqueID(Object object) {
+			if (object instanceof Entity) {
+				return object.getClass().getSimpleName() + "--" + ((Entity) object).getId();
+			}
+			return super.createUniqueID(object);
+		}
+	};
+	protected ProxyManager createProxyManager() {
+		return new MyProxyManager();
+	}
+
 	protected void compareTwoPeople(ProxyManager pm, Person p1, Person p2, Person orig1, Person orig2) {
 		assertTrue("Person proxy equals committed person", p1.equals(p2));
 		assertTrue("Original person object equals proxy committed person", orig1.equals(p2));

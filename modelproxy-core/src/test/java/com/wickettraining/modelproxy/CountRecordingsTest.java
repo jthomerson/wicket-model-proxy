@@ -24,11 +24,11 @@ public class CountRecordingsTest extends BaseProxyManagerTest {
 	public void testCountOfRecordngs() throws Exception {
 		FakeDatabase db = FakeDatabase.get();
 
-		ProxyManager pm = new ProxyManager();
+		ProxyManager pm = createProxyManager();
 		Person person = db.get(Person.class, 1);
 
 		Person orig = person;
-		person = pm.proxy(person, "person");
+		person = pm.proxy(person);
 
 		// call some methods that should not be recorded:
 //		person.getPhoneNumbers();
@@ -38,13 +38,13 @@ public class CountRecordingsTest extends BaseProxyManagerTest {
 		person.equals(person);
 		
 		// and now one that should:
-		person.setId(22);
+		person.setName("update the name");
 		
 		assertEquals(1, pm.getRecordingCount());
 		
 		Person person2 = db.get(Person.class, 1);
 		Person orig2 = person2;
-		pm.proxy(person2, "person");
+		pm.proxy(person2);
 		pm.commit();
 
 		compareTwoPeople(pm, person, person2, orig, orig2);

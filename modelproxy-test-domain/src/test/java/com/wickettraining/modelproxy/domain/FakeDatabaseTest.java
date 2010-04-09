@@ -25,7 +25,14 @@ public class FakeDatabaseTest extends TestCase {
 		Person p1 = db.get(Person.class, 1);
 		assertNotNull(p1);
 		Person p2 = db.get(Person.class, 1);
+		assertNotNull(p2);
+		
 		assertEquals(p1, p2);
+		assertNotSame(p1, p2);
+		
+		p1.addPhoneNumber(new PhoneNumber("abcd"));
+
+		assertFalse("p1 changes should not equal p2", p1.equals(p2));
 		assertNotSame(p1, p2);
 	}
 }

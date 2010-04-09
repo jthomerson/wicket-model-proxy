@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.SerializationUtils;
+
 public class FakeDatabase {
 
 	private static FakeDatabase instance = new FakeDatabase();
@@ -46,8 +48,8 @@ public class FakeDatabase {
 	@SuppressWarnings("unchecked")
 	public final <T extends Entity> T get(Class<T> clazz, int id) {
 		try {
-			return (T) data.get(clazz).get(id).clone();
-		} catch (CloneNotSupportedException ex) {
+			return (T) SerializationUtils.clone((T) data.get(clazz).get(id));
+		} catch (Exception ex) {
 			throw new RuntimeException("Could not clone " + clazz.getName() + " [" + id + "]", ex);
 		}
 	}

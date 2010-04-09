@@ -31,6 +31,9 @@ public class Entity implements Serializable, Cloneable {
 	}
 	
 	public void setId(int id) {
+		if (!isTransient()) {
+			throw new RuntimeException("you can not set the id a second time");
+		}
 		this.id = id;
 	}
 
@@ -42,7 +45,7 @@ public class Entity implements Serializable, Cloneable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + id;
+//		result = prime * result + id;
 		return result;
 	}
 
@@ -54,9 +57,9 @@ public class Entity implements Serializable, Cloneable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Entity other = (Entity) obj;
-		if (id != other.id)
-			return false;
+//		Entity other = (Entity) obj;
+//		if (id != other.id)
+//			return false;
 		return true;
 	}
 

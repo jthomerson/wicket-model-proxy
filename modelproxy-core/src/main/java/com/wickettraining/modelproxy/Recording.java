@@ -24,39 +24,40 @@ public class Recording implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final String uniqueTargetObjectID;
+	private final ObjectLocator objectLocator;
 	private final Object[] args;
 	private final String methodName;
-	private final Class<?>[] methodArgs;
+	private final Class<?>[] methodParamTypes;
 	private transient Method method;
 	
-	public Recording(String uniqueID, Method method, Object[] args) {
+	public Recording(ObjectLocator objectLocator, Method method, Object[] args) {
 		super();
-		this.uniqueTargetObjectID = uniqueID;
+		this.objectLocator = objectLocator;
 		this.method = method;
 		this.methodName = method.getName();
-		this.methodArgs = method.getParameterTypes();
+		this.methodParamTypes = method.getParameterTypes();
 		this.args = args;
 	}
+
+	public ObjectLocator getObjectLocator() {
+		return objectLocator;
+	}
 	
-	public void applyTo(Object target) throws CommitException {
+	public Object applyTo(Object target) throws CommitException {
 		try {
 			if (method == null) {
-				method = target.getClass().getMethod(methodName, methodArgs);
+				method = target.getClass().getMethod(methodName, methodParamTypes);
 			}
-			method.invoke(target, args);
+			return method.invoke(target, args);
 		} catch(Exception ex) {
 			throw new CommitException("Could not commit " + method.getName() + " call to " + target + " with args " + Arrays.toString(args), ex);
 		}
 	}
-	
-	public String getUniqueTargetObjectID() {
-		return uniqueTargetObjectID;
-	}
 
 	@Override
 	public String toString() {
-		return "Recording [method=" + method + ", args=" + Arrays.toString(args) + ", uniqueTargetObjectID=" + uniqueTargetObjectID + "]";
+		return "Recording [methodName=" + methodName + ", methodParamTypes=" + Arrays.toString(methodParamTypes) + ", args=" + Arrays.toString(args) + ", objectLocator=" + objectLocator + "]";
 	}
+
 	
 }
