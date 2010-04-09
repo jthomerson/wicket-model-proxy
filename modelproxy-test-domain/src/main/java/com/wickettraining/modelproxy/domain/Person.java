@@ -45,10 +45,11 @@ public class Person extends Entity implements NamedThing {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	
+
 	public Collection<PhoneNumber> getPhoneNumbers() {
 		return phoneNumbers;
 	}
+
 	public void setPhoneNumbers(Collection<PhoneNumber> phoneNumbers) {
 		if (phoneNumbers == null) {
 			this.phoneNumbers.clear();
@@ -56,6 +57,7 @@ public class Person extends Entity implements NamedThing {
 		}
 		this.phoneNumbers = phoneNumbers;
 	}
+
 	public void addPhoneNumber(PhoneNumber number) {
 		this.phoneNumbers.add(number);
 	}
@@ -66,6 +68,7 @@ public class Person extends Entity implements NamedThing {
 		int result = super.hashCode();
 		result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
 		result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
+		result = prime * result + ((phoneNumbers == null) ? 0 : phoneNumbers.hashCode());
 		return result;
 	}
 
@@ -88,12 +91,17 @@ public class Person extends Entity implements NamedThing {
 				return false;
 		} else if (!lastName.equals(other.lastName))
 			return false;
+		if (phoneNumbers == null) {
+			if (other.phoneNumbers != null)
+				return false;
+		} else if (!phoneNumbers.equals(other.phoneNumbers))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Person [firstName=" + firstName + ", lastName=" + lastName + "]";
+		return "Person [firstName=" + firstName + ", lastName=" + lastName + ", phoneNumbers=" + phoneNumbers + "]";
 	}
 
 }
