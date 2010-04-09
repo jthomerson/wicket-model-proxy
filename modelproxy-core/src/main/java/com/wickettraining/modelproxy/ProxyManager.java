@@ -17,7 +17,6 @@
 package com.wickettraining.modelproxy;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +37,6 @@ public class ProxyManager implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private List<Recording> recordings = new ArrayList<Recording>();
-	private boolean committing = false;
 	private transient ProxyFactory factory;
 	private transient Map<String, Object> targets = new HashMap<String, Object>();
 	
@@ -128,7 +126,6 @@ public class ProxyManager implements Serializable {
 	}
 
 	public synchronized void commit() throws CommitException {
-		committing = true;
 		System.out.println("\nStarting commit");
 		for(Recording rec : new ArrayList<Recording>(recordings)) {
 			System.out.println("Committing: " + rec);
@@ -137,13 +134,12 @@ public class ProxyManager implements Serializable {
 			System.out.println("return from apply: " + result);
 		}
 		System.out.println("Commit complete\n");
-		committing = false;
 	}
 
 	private Interceptor createInterceptor(final ObjectLocator locator) {
 		Interceptor inter = new Interceptor() {
 			
-			public Object intercept(final Invocation invocation) throws Throwable {
+			public Object intercept(Invocation invocation) throws Throwable {
 				int hashBefore = invocation.getProxy().hashCode();
 				Recording rec = new Recording(locator, invocation.getMethod(), invocation.getArguments());
 				boolean doRecord = false;
@@ -153,17 +149,9 @@ public class ProxyManager implements Serializable {
 					try {
 						System.out.println("Because of invocation [" + toString(invocation) + "] , we are creating a subproxy: " + result);
 						doRecord = true;
-						ObjectLocator ourLocator = new ObjectLocator() {
-							private static final long serialVersionUID = 1L;
-
-							public Object getObject() {
-								try {
-									return invocation.getMethod().invoke(locator.getObject(), invocation.getArguments());
-								} catch (Exception e) {
-									throw new RuntimeException("error while trying to locate a child object of the originally proxied object: " + e.getMessage(), e);
-								}
-							}
-						};
+						final Method method = invocation.getMethod();
+						final Object[] methodArgs = invocation.getArguments();
+						ObjectLocator ourLocator = new ChainedLocatorMethodInvokingLocator(locator, method, methodArgs);
 						proxyResult = proxy(result, ourLocator);
 					} catch(Exception ex) {
 						System.err.println("Can not create proxy for: " + result + "[" + ex.getMessage() + "]");

@@ -24,6 +24,7 @@ public class Person extends Entity implements NamedThing {
 
 	private String firstName;
 	private String lastName;
+	// TODO: for some reason this doesn't work with a Set
 	private Collection<PhoneNumber> phoneNumbers = new ArrayList<PhoneNumber>();
 
 	public void setName(String name) {
@@ -94,14 +95,17 @@ public class Person extends Entity implements NamedThing {
 		if (phoneNumbers == null) {
 			if (other.phoneNumbers != null)
 				return false;
-		} else if (!phoneNumbers.equals(other.phoneNumbers))
+		} else if (!phoneNumbers.equals(other.phoneNumbers)) {
+			System.out.println("NOT EQUALS: \n\t" + phoneNumbers + "\n\t" + other.phoneNumbers);
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Person [firstName=" + firstName + ", lastName=" + lastName + ", phoneNumbers=" + phoneNumbers + "]";
+		return "Person [firstName=" + firstName + ", lastName=" + lastName + ", phoneNumbers=" + phoneNumbers + ", [super=" + super.toString() + "]";
 	}
+
 
 }

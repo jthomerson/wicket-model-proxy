@@ -48,6 +48,8 @@ public class BaseProxyManagerTest extends TestCase {
 	}
 
 	protected void compareTwoPeople(ProxyManager pm, Person p1, Person p2, Person orig1, Person orig2) {
+		System.out.println("p1: " + p1);
+		System.out.println("p2: " + p2);
 		assertTrue("Person proxy equals committed person", p1.equals(p2));
 		assertTrue("Original person object equals proxy committed person", orig1.equals(p2));
 		assertTrue("Original person object equals original second person", orig1.equals(orig2));

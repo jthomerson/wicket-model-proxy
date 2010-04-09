@@ -63,7 +63,7 @@ public class PhoneNumber extends Entity {
 
 	@Override
 	public String toString() {
-		return "PhoneNumber [number=" + number + "]";
+		return "PhoneNumber [number=" + number + "], [super=" + super.toString() + "]";
 	}
 
 }
