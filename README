@@ -1,0 +1,9 @@
+This is just a proof-of-concept project.  It is not production ready.  It will likely be abandoned.  
+It was intended for situations where you have a huge object graph that you want to load and edit
+over multiple requests (within Wicket).  Rather than serializing the whole graph, or creating a DTO
+for the graph, you could proxy it.  This proxy would record method calls that could be played back 
+every time you reloaded the object for each request.
+
+
+Again - for emphasis - this is not production-ready and will likely be abandoned.  Feel free to play
+with it and ask me if you have any questions.
