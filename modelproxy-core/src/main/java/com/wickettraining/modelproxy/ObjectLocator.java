@@ -22,4 +22,6 @@ public interface ObjectLocator extends Serializable {
 
 	public Object getObject();
 	
+	public boolean appliesTo(Object obj);
+	
 }

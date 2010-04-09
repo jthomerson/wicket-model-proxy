@@ -44,7 +44,10 @@ public class ProxyingModelHomePage extends HomePage {
 		FakeDatabase db = FakeDatabase.get();
 		List<? extends Person> all = ldm.getObject();
 		try {
-			pm.commitTo(all);
+			for(Person p : all) {
+				pm.proxy(p);
+			}
+			pm.commit();
 		} catch (CommitException e) {
 			System.err.println("Error committing changes to the list before saving");
 			e.printStackTrace();

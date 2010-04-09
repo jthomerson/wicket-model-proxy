@@ -29,6 +29,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.wickettraining.modelproxy.domain.Person;
 import com.wickettraining.modelproxy.domain.PhoneNumber;
@@ -36,6 +38,7 @@ import com.wickettraining.modelproxy.domain.PhoneNumber;
 public class PersonEditPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(PersonEditPanel.class);
 
 	public PersonEditPanel(String id, final IModel<Person> model) {
 		super(id, model);
@@ -55,6 +58,7 @@ public class PersonEditPanel extends Panel {
 
 			@Override
 			public void onClick() {
+				logger.debug("PersonEditPanel#addPhoneNumber#onClick()");
 				model.getObject().getPhoneNumbers().add(new PhoneNumber("new phone number"));
 			}
 			
@@ -74,6 +78,7 @@ public class PersonEditPanel extends Panel {
 
 					@Override
 					public void onClick() {
+						logger.debug("PersonEditPanel#phoneNumbers#" + item.getIndex() + "#delete#onClick()");
 						personModel.getObject().getPhoneNumbers().remove(item.getModelObject());
 						item.findParent(ListView.class).replaceWith(createPhoneNumberListView(id, personModel, phoneNumbers));
 					}

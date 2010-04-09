@@ -68,6 +68,7 @@ public class HomePage extends BasePage {
 					private static final long serialVersionUID = 1L;
 
 					protected void onEditClicked() {
+						logger.debug("HomePage#PersonViewPanel#onEditClicked()");
 						final PersonViewPanel pvp = this;
 						replaceWith(new PersonEditPanel(getId(), item.getModel()) {
 							private static final long serialVersionUID = 1L;

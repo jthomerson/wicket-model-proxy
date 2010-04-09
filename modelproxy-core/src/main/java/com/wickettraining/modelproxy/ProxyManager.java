@@ -20,10 +20,10 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.proxy.Interceptor;
 import org.apache.commons.proxy.Invocation;
@@ -40,6 +40,7 @@ public class ProxyManager implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(ProxyManager.class);
 
 	private List<Recording> recordings = new ArrayList<Recording>();
+	private AtomicBoolean committed = new AtomicBoolean(false);
 	private transient ProxyFactory factory;
 	private transient Map<String, Object> targets = new HashMap<String, Object>();
 	
@@ -53,11 +54,13 @@ public class ProxyManager implements Serializable {
 			@Override
 			protected T load() {
 				T ret = proxy(model.getObject());
-				try {
-					commit();
-				} catch(Exception ex) {
-					System.err.println("Error while committing during proxyModel#load: " + ex.getMessage());
-					ex.printStackTrace();
+				if (!committed.get()) {
+					try {
+						commit(ret);
+					} catch(Exception ex) {
+						logger.warn("Error while committing during proxyModel#load: " + ex.getMessage());
+						ex.printStackTrace();
+					}
 				}
 				return ret;
 			}
@@ -80,13 +83,17 @@ public class ProxyManager implements Serializable {
 		final String uniqueID = createUniqueID(object);
 		Object replaced = targets.put(uniqueID, object);
 		if (replaced != null) {
-			System.err.println("WARNING: you replaced one object with another in the proxy manager.  this was most likely a mistake.  you should make sure that you are truly generating a unique ID for each object");
+			logger.warn("WARNING: you replaced one object with another in the proxy manager.  this was most likely a mistake.  you should make sure that you are truly generating a unique ID for each object");
 		}
 		ObjectLocator locator = new ObjectLocator() {
 			private static final long serialVersionUID = 1L;
 
 			public Object getObject() {
 				return targets.get(uniqueID);
+			}
+			
+			public boolean appliesTo(Object obj) {
+				return obj.equals(getObject());
 			}
 		};
 
@@ -96,7 +103,7 @@ public class ProxyManager implements Serializable {
 	@SuppressWarnings("unchecked")
 	public final <T> T proxy(T object, final ObjectLocator locator) {
 		if (object == null) {
-			System.err.println("WARNING: can not proxy null object");
+			logger.error("WARNING: can not proxy null object");
 			return null;
 		}
 		T proxy = (T) getFactory().createInterceptorProxy(object, createInterceptor(locator), new Class[] { object.getClass() });
@@ -111,32 +118,30 @@ public class ProxyManager implements Serializable {
 		return new CglibProxyFactory();
 	}
 
-	public synchronized void commitTo(Object object) throws CommitException {
-		commitTo(object, createUniqueID(object));
+	public synchronized void commit() throws CommitException {
+		commit(null);
 	}
-	public synchronized void commitTo(Object object, String string) throws CommitException {
-		if (object instanceof Collection<?>) {
-			for(Object obj : ((Collection<?>) object)) {
-				replaceTarget(obj);
+
+	public synchronized void commit(Object obj) throws CommitException {
+		logger.debug("Starting commit [target=" + obj +"]");
+		for(Recording rec : new ArrayList<Recording>(recordings)) {
+			boolean doCommit = obj == null;
+			if (obj != null) {
+				if (rec.getObjectLocator().appliesTo(obj)) {
+					doCommit = true;
+				} else {
+					logger.debug("not committing because this doesn't apply: " + rec);
+				}
+			}
+			if (doCommit) {
+				logger.debug("Committing: " + rec);
+				Object target = rec.getObjectLocator().getObject();
+				Object result = rec.applyTo(target);
+				logger.debug("return from apply: " + result);
 			}
 		}
-		replaceTarget(object);
-		commit();
-	}
-
-	private void replaceTarget(Object obj) {
-		targets.put(createUniqueID(obj), obj);
-	}
-
-	public synchronized void commit() throws CommitException {
-		logger.debug("Starting commit");
-		for(Recording rec : new ArrayList<Recording>(recordings)) {
-			logger.debug("Committing: " + rec);
-			Object target = rec.getObjectLocator().getObject();
-			Object result = rec.applyTo(target);
-			logger.debug("return from apply: " + result);
-		}
-		logger.debug("Commit complete");
+		logger.debug("Commit complete [target=" + obj +"]");
+		committed.set(true);
 	}
 
 	private Interceptor createInterceptor(final ObjectLocator locator) {
@@ -157,13 +162,14 @@ public class ProxyManager implements Serializable {
 						ObjectLocator ourLocator = new ChainedLocatorMethodInvokingLocator(locator, method, methodArgs);
 						proxyResult = proxy(result, ourLocator);
 					} catch(Exception ex) {
-						System.err.println("Can not create proxy for: " + result + "[" + ex.getMessage() + "]");
+						logger.warn("Can not create proxy for: " + result + "[" + ex.getMessage() + "]");
 					}
 				}
 				int hashAfter = invocation.getProxy().hashCode();
 				doRecord = doRecord ? true : hashAfter != hashBefore;
 				synchronized (ProxyManager.this) {
 					if (doRecord) {
+						committed.set(false);
 						recordings.add(rec);
 						logger.debug("Recorded: " + rec);
 					} else {

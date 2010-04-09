@@ -33,6 +33,10 @@ public class ChainedLocatorMethodInvokingLocator implements ObjectLocator {
 		this.args = methodArgs;
 	}
 	
+	public boolean appliesTo(Object obj) {
+		return obj.equals(getObject()) || parent.appliesTo(obj);
+	}
+	
 	public Object getObject() {
 		try {
 			Method method = parent.getObject().getClass().getMethod(methodName, methodParameterTypes);
