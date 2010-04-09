@@ -22,13 +22,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FakeDatabase {
 
-	private static FakeDatabase instance = new FakeDatabase();
+	private static final Object LOCK = new Object();
+	private static FakeDatabase instance;
+	private static final Logger logger = LoggerFactory.getLogger(FakeDatabase.class);
 
 	public static final FakeDatabase get() {
-		return instance;
+		synchronized(LOCK) {
+			if (instance == null) {
+				instance = new FakeDatabase();
+			}
+			return instance;
+		}
 	}
 	
 	private Map<Class<? extends Entity>, Map<Integer, Entity>> data = new HashMap<Class<? extends Entity>, Map<Integer,Entity>>();
@@ -55,14 +64,14 @@ public class FakeDatabase {
 	}
 	
 	public void saveAll(List<? extends Entity> objects) {
-		System.out.println("Saving list of objects [" + objects.size() + "]");
+		logger.debug("Saving list of objects [" + objects.size() + "]");
 		for(Entity ent : objects) {
 			save(ent);
 		}
 	}
 
 	public final void save(Entity entity) {
-		System.out.println("saving object: " + entity);
+		logger.debug("saving object: " + entity);
 		putEntity(entity);
 	}
 

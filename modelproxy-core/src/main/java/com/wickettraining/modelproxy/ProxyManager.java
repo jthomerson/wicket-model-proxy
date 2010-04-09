@@ -31,10 +31,13 @@ import org.apache.commons.proxy.ProxyFactory;
 import org.apache.commons.proxy.factory.cglib.CglibProxyFactory;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProxyManager implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(ProxyManager.class);
 
 	private List<Recording> recordings = new ArrayList<Recording>();
 	private transient ProxyFactory factory;
@@ -126,14 +129,14 @@ public class ProxyManager implements Serializable {
 	}
 
 	public synchronized void commit() throws CommitException {
-		System.out.println("\nStarting commit");
+		logger.debug("Starting commit");
 		for(Recording rec : new ArrayList<Recording>(recordings)) {
-			System.out.println("Committing: " + rec);
+			logger.debug("Committing: " + rec);
 			Object target = rec.getObjectLocator().getObject();
 			Object result = rec.applyTo(target);
-			System.out.println("return from apply: " + result);
+			logger.debug("return from apply: " + result);
 		}
-		System.out.println("Commit complete\n");
+		logger.debug("Commit complete");
 	}
 
 	private Interceptor createInterceptor(final ObjectLocator locator) {
@@ -147,7 +150,7 @@ public class ProxyManager implements Serializable {
 				Object proxyResult = null;
 				if (result != null && isModifiable(result)) {
 					try {
-						System.out.println("Because of invocation [" + toString(invocation) + "] , we are creating a subproxy: " + result);
+						logger.debug("Because of invocation [" + toString(invocation) + "] , we are creating a subproxy: " + result);
 						doRecord = true;
 						final Method method = invocation.getMethod();
 						final Object[] methodArgs = invocation.getArguments();
@@ -162,9 +165,9 @@ public class ProxyManager implements Serializable {
 				synchronized (ProxyManager.this) {
 					if (doRecord) {
 						recordings.add(rec);
-						System.out.println("Recorded: " + rec);
+						logger.debug("Recorded: " + rec);
 					} else {
-//						System.out.println("No change, did not record: " + rec);
+						logger.debug("No change, did not record: " + rec);
 					}
 				}
 				return proxyResult == null ? result : proxyResult;

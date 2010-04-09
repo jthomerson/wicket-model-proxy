@@ -96,7 +96,6 @@ public class Person extends Entity implements NamedThing {
 			if (other.phoneNumbers != null)
 				return false;
 		} else if (!phoneNumbers.equals(other.phoneNumbers)) {
-			System.out.println("NOT EQUALS: \n\t" + phoneNumbers + "\n\t" + other.phoneNumbers);
 			return false;
 		}
 		return true;

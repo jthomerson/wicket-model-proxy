@@ -31,23 +31,23 @@ public class SimpleOperationalTest extends BaseProxyManagerTest {
 		Person orig = person;
 		person = pm.proxy(person);
 
-		System.out.println("SETTING LAST NAME");
+		logger.debug("SETTING LAST NAME");
 		person.setLastName("Test");
-		System.out.println("SETTING NAME");
+		logger.debug("SETTING NAME");
 		person.setName("interface works");
-		System.out.println("First phone number change - direct");
+		logger.debug("First phone number change - direct");
 		person.addPhoneNumber(new PhoneNumber("direct add"));
-		System.out.println("Second phone number change - indirect");
+		logger.debug("Second phone number change - indirect");
 		person.getPhoneNumbers().add(new PhoneNumber("add through collection"));
 
-		System.out.println("Creating a second person to commit changes to");
+		logger.debug("Creating a second person to commit changes to");
 		Person person2 = db.get(Person.class, 1);
 		Person orig2 = person2;
 		pm.proxy(person2);
 		pm.commit();
 
-		System.out.println("P1 RESULT: " + person);
-		System.out.println("P2 RESULT: " + person2);
+		logger.debug("P1 RESULT: " + person);
+		logger.debug("P2 RESULT: " + person2);
 		compareTwoPeople(pm, person, person2, orig, orig2);
 	}
 
@@ -57,7 +57,7 @@ public class SimpleOperationalTest extends BaseProxyManagerTest {
 		ProxyManager pm = createProxyManager();
 		Person person = db.get(Person.class, 2);
 		int originalNumberOfPhoneNumbers = person.getPhoneNumbers().size();
-		System.out.println("Person hash code: " + person.hashCode());
+		logger.debug("Person hash code: " + person.hashCode());
 
 		Person orig = person;
 		person = pm.proxy(person);
@@ -70,12 +70,12 @@ public class SimpleOperationalTest extends BaseProxyManagerTest {
 		assertEquals(originalNumberOfPhoneNumbers + 1, person.getPhoneNumbers().size());
 
 		Person person2 = db.get(Person.class, 2);
-		System.out.println("person before: " + person);
-		System.out.println("person2 before: " + person2);
+		logger.debug("person before: " + person);
+		logger.debug("person2 before: " + person2);
 		Person orig2 = person2;
 		pm.proxy(person2);
 		pm.commit();
-		System.out.println("person2 after: " + person2);
+		logger.debug("person2 after: " + person2);
 
 		assertEquals(person.getPhoneNumbers().size(), person2.getPhoneNumbers().size());
 

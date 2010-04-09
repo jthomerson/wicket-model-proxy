@@ -24,6 +24,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.wickettraining.modelproxy.domain.FakeDatabase;
 import com.wickettraining.modelproxy.domain.Person;
@@ -31,6 +33,7 @@ import com.wickettraining.modelproxy.domain.Person;
 public class HomePage extends BasePage {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(HomePage.class);
 
     public HomePage(final PageParameters parameters) {
 		final IModel<? extends List<? extends Person>> ldm = new LoadAllPeopleModel();
@@ -40,7 +43,7 @@ public class HomePage extends BasePage {
 
 			@Override
     		public void onSubmit() {
-    			System.out.println("Button('cancel').onSubmit()");
+    			logger.debug("Button('cancel').onSubmit()");
     			setResponsePage(getPageClass());
     		}
     	});
@@ -49,7 +52,7 @@ public class HomePage extends BasePage {
 
 			@Override
     		public void onSubmit() {
-    			System.out.println("Button('save').onSubmit()");
+    			logger.debug("Button('save').onSubmit()");
     			doSaveAll(ldm);
     			setResponsePage(getPageClass());
     		}

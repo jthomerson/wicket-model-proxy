@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import junit.framework.TestCase;
 
 import com.wickettraining.modelproxy.domain.Entity;
@@ -27,6 +30,8 @@ import com.wickettraining.modelproxy.domain.Person;
 
 public class BaseProxyManagerTest extends TestCase {
 
+	protected static final Logger logger = LoggerFactory.getLogger(BaseProxyManagerTest.class);
+	
 	public void testNothing() throws Exception {
 		// no-op test so this doesn't fail
 		// this is simply a base class, not a real test case class
@@ -48,14 +53,14 @@ public class BaseProxyManagerTest extends TestCase {
 	}
 
 	protected void compareTwoPeople(ProxyManager pm, Person p1, Person p2, Person orig1, Person orig2) {
-		System.out.println("p1: " + p1);
-		System.out.println("p2: " + p2);
+		logger.debug("p1: " + p1);
+		logger.debug("p2: " + p2);
 		assertTrue("Person proxy equals committed person", p1.equals(p2));
 		assertTrue("Original person object equals proxy committed person", orig1.equals(p2));
 		assertTrue("Original person object equals original second person", orig1.equals(orig2));
 		try {
-			System.out.println("ProxyManager size: " + getObjectSize(pm));
-			System.out.println("Person size: " + getObjectSize(orig1));
+			logger.debug("ProxyManager size: " + getObjectSize(pm));
+			logger.debug("Person size: " + getObjectSize(orig1));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
