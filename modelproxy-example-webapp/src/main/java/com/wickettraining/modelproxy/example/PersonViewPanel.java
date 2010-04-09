@@ -16,6 +16,9 @@
 
 package com.wickettraining.modelproxy.example;
 
+import java.util.List;
+import java.util.Set;
+
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -24,6 +27,7 @@ import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 
 import com.wickettraining.modelproxy.domain.Person;
 import com.wickettraining.modelproxy.domain.PhoneNumber;
@@ -36,7 +40,8 @@ public class PersonViewPanel extends Panel {
 		super(id, new CompoundPropertyModel<Person>(model));
 		add(new Label("firstName"));
 		add(new Label("lastName"));
-		add(createPhoneNumberListView("phoneNumbers"));
+		CollectionToListModel<PhoneNumber> listModel = new CollectionToListModel<PhoneNumber>(new PropertyModel<Set<PhoneNumber>>(model, "phoneNumbers"));
+		add(createPhoneNumberListView("phoneNumbers", listModel));
 		add(new Link<Void>("edit") {
 			private static final long serialVersionUID = 1L;
 
@@ -47,8 +52,8 @@ public class PersonViewPanel extends Panel {
 		});
 	}
 
-	protected ListView<PhoneNumber> createPhoneNumberListView(String id) {
-		return new PropertyListView<PhoneNumber>(id) {
+	protected ListView<PhoneNumber> createPhoneNumberListView(String id, IModel<List<? extends PhoneNumber>> collectionToListModel) {
+		return new PropertyListView<PhoneNumber>(id, collectionToListModel) {
 			private static final long serialVersionUID = 1L;
 
 			@Override

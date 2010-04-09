@@ -56,7 +56,14 @@
 				<artifactId>cglib-nodep</artifactId>
 				<version>2.2</version>
 			</dependency>
-			
+
+			<!-- COMMONS DEPENDENCIES -->
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>2.5</version>
+			</dependency>			
+
 			<!-- LOGGING DEPENDENCIES - LOG4J -->
 			<dependency>
 				<groupId>org.slf4j</groupId>

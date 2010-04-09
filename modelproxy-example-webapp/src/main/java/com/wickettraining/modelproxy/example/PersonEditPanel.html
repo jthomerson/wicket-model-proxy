@@ -19,8 +19,12 @@
 <wicket:panel>
    	<form wicket:id="form">
     	<input type="text" wicket:id="lastName" />, <input type="text" wicket:id="firstName" />
+    	<a wicket:id="addPhoneNumber">add phone number</a>
 		<ul>
-			<li wicket:id="phoneNumbers"><input type="text" wicket:id="number" /></li>
+			<li wicket:id="phoneNumbers">
+				<input type="text" wicket:id="number" />
+				<a wicket:id="delete">delete</a>
+			</li>
 		</ul>
 	   	<input type="submit" value="Save" />
    	</form>
