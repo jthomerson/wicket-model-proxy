@@ -31,6 +31,11 @@ public class FakeDatabase {
 	private static FakeDatabase instance;
 	private static final Logger logger = LoggerFactory.getLogger(FakeDatabase.class);
 
+	public static final void reset() {
+		synchronized (LOCK) {
+			instance = null;
+		}
+	}
 	public static final FakeDatabase get() {
 		synchronized(LOCK) {
 			if (instance == null) {
