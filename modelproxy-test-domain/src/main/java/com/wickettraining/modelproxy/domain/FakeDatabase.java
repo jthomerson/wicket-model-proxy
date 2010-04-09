@@ -55,12 +55,14 @@ public class FakeDatabase {
 	}
 	
 	public void saveAll(List<? extends Entity> objects) {
+		System.out.println("Saving list of objects [" + objects.size() + "]");
 		for(Entity ent : objects) {
 			save(ent);
 		}
 	}
 
 	public final void save(Entity entity) {
+		System.out.println("saving object: " + entity);
 		putEntity(entity);
 	}
 
